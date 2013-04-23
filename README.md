@@ -3,12 +3,11 @@ Description
 
 Installs and configures Graphite http://graphite.wikidot.com/
 
-**NOTE** This fork depends
+**NOTE** This fork depends on:
 
-* [nginx](http://community.opscode.com/cookbooks/nginx)
-* [runit](http://community.opscode.com/cookbooks/runit)
-* [memcached](http://community.opscode.com/cookbooks/memcached)
-* [gunicorn](http://community.opscode.com/cookbooks/gunicorn)
+* [nginx](http://community.opscode.com/cookbooks/nginx) for webapp
+* [runit](http://community.opscode.com/cookbooks/runit) for service supervising
+* [gunicorn](http://community.opscode.com/cookbooks/gunicorn) for daemonization
 
 Requirements
 ============
