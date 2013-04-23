@@ -1,0 +1,6 @@
+<% for @schema in @schemas %>
+[<%= @schema['name'] %>]
+pattern = <%= @schema['pattern'] %>
+retentions = <%= @schema['retentions'] %>
+
+<% end %>

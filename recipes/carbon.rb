@@ -17,46 +17,27 @@
 # limitations under the License.
 #
 
-package "python-twisted"
-package "python-simplejson"
+#package "python-twisted"
 
 if node['graphite']['carbon']['enable_amqp']
-  include_recipe "python::pip"
-  python_pip "txamqp" do
-    action :install
-  end
+    package "python-txamqp"
+end
+
+python_pip "simplejson" do
+  action :install
 end
 
 version = node['graphite']['version']
-pyver = node['languages']['python']['version'][0..-3]
+#pyver = node['languages']['python']['version'][0..-3]
 
-remote_file "#{Chef::Config[:file_cache_path]}/carbon-#{version}.tar.gz" do
-  source node['graphite']['carbon']['uri']
-  checksum node['graphite']['carbon']['checksum']
-end
-
-execute "untar carbon" do
-  command "tar xzf carbon-#{version}.tar.gz"
-  creates "#{Chef::Config[:file_cache_path]}/carbon-#{version}"
-  cwd Chef::Config[:file_cache_path]
-end
-
-execute "install carbon" do
-  command "python setup.py install --prefix=#{node['graphite']['base_dir']} --install-lib=#{node['graphite']['base_dir']}/lib"
-  creates "#{node['graphite']['base_dir']}/lib/carbon-#{version}-py#{pyver}.egg-info"
-  cwd "#{Chef::Config[:file_cache_path]}/carbon-#{version}"
-end
-
-case node['graphite']['carbon']['service_type']
-when "runit"
-  carbon_cache_service_resource = "runit_service[carbon-cache]"
-else
-  carbon_cache_service_resource = "service[carbon-cache]"
+python_pip "carbon" do
+  version version
+  action :install
 end
 
 template "#{node['graphite']['base_dir']}/conf/carbon.conf" do
-  owner node['apache']['user']
-  group node['apache']['group']
+  owner node['nginx']['user']
+  group node['nginx']['group']
   variables( :line_receiver_interface => node['graphite']['carbon']['line_receiver_interface'],
              :line_receiver_port => node['graphite']['carbon']['line_receiver_port'],
              :pickle_receiver_interface => node['graphite']['carbon']['pickle_receiver_interface'],
@@ -76,37 +57,35 @@ template "#{node['graphite']['base_dir']}/conf/carbon.conf" do
              :amqp_exchange => node['graphite']['carbon']['amqp_exchange'],
              :amqp_metric_name_in_body => node['graphite']['carbon']['amqp_metric_name_in_body'],
              :storage_dir => node['graphite']['storage_dir'])
-  notifies :restart, carbon_cache_service_resource
+  notifies :restart, "service[carbon-cache]"
 end
 
-%w{ schemas aggregation }.each do |storage_feature|
-  storage_config = node['graphite']['storage_' + storage_feature]
+#Chef::Log.info resources(:service => "carbon-cache")
 
-  template "#{node['graphite']['base_dir']}/conf/storage-#{storage_feature}.conf" do
-    source 'storage.conf.erb'
-    owner node['apache']['user']
-    group node['apache']['group']
-    variables({:storage_config => storage_config})
-    only_if { storage_config.is_a?(Array) }
-  end
+template "#{node['graphite']['base_dir']}/conf/storage-schemas.conf" do
+  owner node['nginx']['user']
+  group node['nginx']['group']
+  variables({
+    :schemas => node['graphite']['carbon']['schemas']
+  })
+  notifies :restart, "service[carbon-cache]"
 end
 
 directory node['graphite']['storage_dir'] do
-  owner node['apache']['user']
-  group node['apache']['group']
+  owner node['nginx']['user']
+  group node['nginx']['group']
   recursive true
 end
 
-%w{ log whisper }.each do |dir|
-  directory "#{node['graphite']['storage_dir']}/#{dir}" do
-    owner node['apache']['user']
-    group node['apache']['group']
-  end
+directory "#{node['graphite']['storage_dir']}/whisper" do
+  owner node['nginx']['user']
+  group node['nginx']['group']
+  recursive true
 end
 
 directory "#{node['graphite']['base_dir']}/lib/twisted/plugins/" do
-  owner node['apache']['user']
-  group node['apache']['group']
+  owner node['nginx']['user']
+  group node['nginx']['group']
   recursive true
 end
 

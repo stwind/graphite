@@ -3,13 +3,19 @@ Description
 
 Installs and configures Graphite http://graphite.wikidot.com/
 
+**NOTE** This fork depends
+
+* [nginx](http://community.opscode.com/cookbooks/nginx)
+* [runit](http://community.opscode.com/cookbooks/runit)
+* [memcached](http://community.opscode.com/cookbooks/memcached)
+* [gunicorn](http://community.opscode.com/cookbooks/gunicorn)
+
 Requirements
 ============
 
 * Ubuntu 10.04 / Ubuntu 12.04
 * Debian
 * RHEL and derivatives (Centos, Amazon Linux, Oracle Linux, Scientific Linux)
-* Fedora
 
 Attributes
 ==========

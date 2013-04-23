@@ -13,6 +13,10 @@ default['graphite']['doc_root'] = "/opt/graphite/webapp"
 default['graphite']['storage_dir'] = "/opt/graphite/storage"
 default['graphite']['timezone'] = "America/Los_Angeles"
 default['graphite']['django_root'] = "@DJANGO_ROOT@"
+default['graphite']['django_ver'] = "1.4.5"
+default['graphite']['django_port'] = 8080
+default['graphite']['django_addr'] = "0.0.0.0"
+default['graphite']['webapp_port'] = 80
 
 default['graphite']['whisper']['uri'] = "https://launchpad.net/graphite/0.9/#{node['graphite']['version']}/+download/whisper-#{node['graphite']['version']}.tar.gz"
 default['graphite']['whisper']['checksum'] = "36b5fa917526224678da0a530a6f276d00074f0aa98acd6e2412c79521f9c4ff"
@@ -32,12 +36,16 @@ default['graphite']['carbon']['max_cache_size'] = "inf"
 default['graphite']['carbon']['max_creates_per_second'] = "inf"
 default['graphite']['carbon']['max_updates_per_second'] = "1000"
 
-default['graphite']['storage_aggregation'] = nil
-default['graphite']['storage_schemas'] = [
+default['graphite']['carbon']['schemas'] = [
   {
-    'name' => 'catchall', 
-    'pattern' => '^.*', 
-    'retentions' => '60:100800,900:63000'
+    :name => "metrics",
+    :pattern => "^metrics.*",
+    :retentions => "10s:7d,1m:14d,15m:2y"
+  },
+  {
+    :name => "catchall",
+    :pattern => "^.*",
+    :retentions => "60s:7d,15m:21d,1h:1y"
   }
 ]
 
